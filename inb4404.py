@@ -13,6 +13,7 @@ def main():
     global args
     parser = argparse.ArgumentParser(description='inb4404')
     parser.add_argument('thread', nargs=1, help='url of the thread (or filename; one url per line)')
+    parser.add_argument('-o', '--output', help='output directory')
     parser.add_argument('-c', '--with-counter', action='store_true', help='show a counter next the the image that has been downloaded')
     parser.add_argument('-d', '--date', action='store_true', help='show date as well')
     parser.add_argument('-l', '--less', action='store_true', help='show less information (surpresses checking messages)')
@@ -70,10 +71,13 @@ def call_download_thread(thread_link, args):
 def download_thread(thread_link, args):
     board = thread_link.split('/')[3]
     thread = thread_link.split('/')[5].split('#')[0]
+    output_dir = args.output if args.output else workpath
+    download_dir = os.path.join(output_dir, 'downloads', board)
+
     if len(thread_link.split('/')) > 6:
         thread_tmp = thread_link.split('/')[6].split('#')[0]
 
-        if args.use_names or os.path.exists(os.path.join(workpath, 'downloads', board, thread_tmp)):                
+        if args.use_names or os.path.exists(os.path.join(download_dir, thread_tmp)):                
             thread = thread_tmp
 
     while True:
@@ -85,7 +89,7 @@ def download_thread(thread_link, args):
             regex_result_len = len(regex_result)
             regex_result_cnt = 1
 
-            directory = os.path.join(workpath, 'downloads', board, thread)
+            directory = os.path.join(download_dir, thread)
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
@@ -119,7 +123,7 @@ def download_thread(thread_link, args):
                     # if you delete them there, they are not downloaded again
                     # if you delete an image in the 'downloads' directory, it will be downloaded again
                     if not args.no_new_dir:
-                        copy_directory = os.path.join(workpath, 'new', board, thread)
+                        copy_directory = os.path.join(output_dir, 'new', board, thread)
                         if not os.path.exists(copy_directory):
                             os.makedirs(copy_directory)
                         copy_path = os.path.join(copy_directory, img)
